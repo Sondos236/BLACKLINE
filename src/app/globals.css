@@ -1,26 +1,289 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------ tokens */
+
+:root,
+[data-theme="dark"],
+.stage {
+  --bg: #09090a;
+  --bg-elev: #0f0f11;
+  --surface: #151517;
+  --surface-2: #1c1c1f;
+  --fg: #ededec;
+  --fg-muted: #9a9a9f;
+  --fg-subtle: #5f5f65;
+  --line: rgb(255 255 255 / 0.09);
+  --line-strong: rgb(255 255 255 / 0.2);
+  --accent: #b8bcc4; /* soft metallic */
+  --invert-bg: #ededec;
+  --invert-fg: #09090a;
+  --shade: 9 9 10; /* rgb triplet of --bg for gradients */
+  --danger: #f2877d;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f3f2ef;
+  --bg-elev: #eceae6;
+  --surface: #e4e2dd;
+  --surface-2: #d9d7d1;
+  --fg: #0c0c0d;
+  --fg-muted: #57575c;
+  --fg-subtle: #8b8b90;
+  --line: rgb(12 12 13 / 0.1);
+  --line-strong: rgb(12 12 13 / 0.24);
+  --accent: #5d6169;
+  --invert-bg: #0c0c0d;
+  --invert-fg: #f3f2ef;
+  --shade: 243 242 239;
+  --danger: #b4291c;
+  color-scheme: light;
+}
+
+/* Cinematic image stages stay dark in both themes. */
+[data-theme="light"] .stage {
+  --bg: #09090a;
+  --fg: #ededec;
+  --fg-muted: #a3a3a8;
+  --fg-subtle: #6a6a70;
+  --line: rgb(255 255 255 / 0.12);
+  --line-strong: rgb(255 255 255 / 0.28);
+  --accent: #b8bcc4;
+  --invert-bg: #ededec;
+  --invert-fg: #09090a;
+  --shade: 9 9 10;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-elev: var(--bg-elev);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-invert-bg: var(--invert-bg);
+  --color-invert-fg: var(--invert-fg);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-body), sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --breakpoint-xs: 26rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* -------------------------------------------------------------------- base */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--fg);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  img {
+    -webkit-user-drag: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Theme switch fallback (no View Transitions): briefly animate colours. */
+html.theme-fade,
+html.theme-fade * {
+  transition:
+    background-color 450ms var(--ease-out-expo),
+    color 450ms var(--ease-out-expo),
+    border-color 450ms var(--ease-out-expo) !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* -------------------------------------------------------------- typography */
+
+@layer components {
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-variation-settings: "wdth" 118;
+    font-size: clamp(2.75rem, 10.5vw, 11rem);
+    line-height: 0.86;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+  }
+
+  .t-heading {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-variation-settings: "wdth" 112;
+    font-size: clamp(2rem, 5.2vw, 4.75rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+  }
+
+  /* Heading for narrow (≈5/12) columns where long words must still fit. */
+  .t-heading-narrow {
+    font-size: clamp(2rem, 3.7vw, 3.75rem);
+  }
+
+  .t-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-variation-settings: "wdth" 108;
+    font-size: clamp(1.375rem, 2.4vw, 2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .t-lead {
+    font-size: clamp(1.0625rem, 1.5vw, 1.375rem);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: var(--fg-muted);
+  }
+
+  .t-body {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--fg-muted);
+  }
+
+  .t-caption {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--fg-muted);
+  }
+
+  .t-meta {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+
+  .t-num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-variation-settings: "wdth" 112;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+  }
+
+  /* Outline display type — used for large background typography. */
+  .t-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--line-strong);
+  }
+
+  .container-x {
+    width: 100%;
+    margin-inline: auto;
+    max-width: 112rem;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 640px) {
+    .container-x {
+      padding-inline: 2rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .container-x {
+      padding-inline: 3.5rem;
+    }
+  }
+
+  /* Hairline underline that draws in on hover. */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 100% 100%;
+    background-repeat: no-repeat;
+    transition: background-size 500ms var(--ease-out-expo);
+  }
+  .link-underline:hover,
+  .link-underline[aria-current="page"] {
+    background-size: 100% 1px;
+    background-position: 0% 100%;
+  }
+
+  /* Subtle film grain over cinematic stages. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------- reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------ intro state */
+
+/* Intro elements wait (hidden) for their GSAP timeline — only when JS runs,
+   with a failsafe so content can never stay invisible. */
+.js [data-intro] {
+  visibility: hidden;
+  animation: intro-failsafe 0s linear 4s forwards;
+}
+@keyframes intro-failsafe {
+  to {
+    visibility: visible;
+  }
 }
